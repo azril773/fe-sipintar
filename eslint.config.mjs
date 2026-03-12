@@ -10,7 +10,7 @@ import tseslint from 'typescript-eslint';
 export default defineConfig([
   {
     
-    ignores: ['src/components/catalyst-ui/**/*.{js,ts,tsx}', 'src/components/global/**/*.{js,ts,tsx}', 'src/components/time-picker/**/*.{js,ts,tsx}', 'src/components/ui/**/*.{js,ts,tsx}'],
+    ignores: ['src/components/global/**/*.{js,ts,tsx}', 'src/components/ui/**/*.{js,ts,tsx}'],
   },
   tseslint.configs.recommended,
   {
