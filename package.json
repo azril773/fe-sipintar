@@ -44,6 +44,6 @@
     "typescript-eslint": "^8.57.0"
   },
   "lint-staged": {
-    "**/*.{js,ts,tsx}": "eslint --fix -max-warnings=0"
+    "src/**/*.{js,ts,tsx}": "eslint --fix --max-warnings=0 --no-warn-ignored"
   }
 }
