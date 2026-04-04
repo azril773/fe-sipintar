@@ -4,7 +4,13 @@ import {
 
 import { Route } from "@/types/common";
 
+
+export const DOMAIN = process.env.DOMAIN || "localhost:8080";
 export const BASE_URL = process.env.BASE_URL || "http://localhost:8080";
+export const ACTIVE = "active"
+export const SUSPENDED = "suspended"
+export const PENDING = "pending"
+export const CANCELLED = "cancelled"
 
 export const UNAUTHORIZED_CODE = 401
 
