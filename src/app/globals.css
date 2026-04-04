@@ -96,8 +96,8 @@
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --accent: oklch(0.269 0 0) !important;
+  --accent-foreground: oklch(0.985 0 0) !important;
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
@@ -130,29 +130,6 @@
 }
 
 /* Accent color tokens for runtime theme switching */
-:root {
-  --accent: #0000ff;
-  --accent-2: #ff0000;
-  --accent-light: rgba(0, 0, 255, 0.08);
-}
-
-[data-accent="blue"] {
-  --accent: #0000ff;
-  --accent-2: #ff0000;
-  --accent-light: rgba(0, 0, 255, 0.08);
-}
-
-[data-accent="red"] {
-  --accent: #ff0000;
-  --accent-2: #0000ff;
-  --accent-light: rgba(255, 0, 0, 0.08);
-}
-
-[data-accent="neutral"] {
-  --accent: #6b7280;
-  --accent-2: #9ca3af;
-  --accent-light: rgba(107, 114, 128, 0.08);
-}
 
 .text-gradient {
   background: linear-gradient(135deg, #1e3a8a 0%, #059669 100%);
