@@ -47,6 +47,7 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -130,30 +131,48 @@
 
 /* Accent color tokens for runtime theme switching */
 :root {
-  --accent: #0000FF;
-  --accent-2: #FF0000;
-  --accent-light: rgba(0,0,255,0.08);
+  --accent: #0000ff;
+  --accent-2: #ff0000;
+  --accent-light: rgba(0, 0, 255, 0.08);
 }
 
 [data-accent="blue"] {
-  --accent: #0000FF;
-  --accent-2: #FF0000;
-  --accent-light: rgba(0,0,255,0.08);
+  --accent: #0000ff;
+  --accent-2: #ff0000;
+  --accent-light: rgba(0, 0, 255, 0.08);
 }
 
 [data-accent="red"] {
-  --accent: #FF0000;
-  --accent-2: #0000FF;
-  --accent-light: rgba(255,0,0,0.08);
+  --accent: #ff0000;
+  --accent-2: #0000ff;
+  --accent-light: rgba(255, 0, 0, 0.08);
 }
 
 [data-accent="neutral"] {
-  --accent: #6B7280;
-  --accent-2: #9CA3AF;
-  --accent-light: rgba(107,114,128,0.08);
+  --accent: #6b7280;
+  --accent-2: #9ca3af;
+  --accent-light: rgba(107, 114, 128, 0.08);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #1e3a8a 0%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 /* small helpers */
-.accent-bg { background-color: var(--accent); }
-.accent-text { color: var(--accent); }
-.accent-light { background-color: var(--accent-light); }
+.accent-bg {
+  background-color: var(--accent);
+}
+.accent-text {
+  color: var(--accent);
+}
+.accent-light {
+  background-color: var(--accent-light);
+}
+
+
+.rounded-bg-login {
+  border-top-left-radius:  calc(var(--radius) * 25);
+  border-bottom-left-radius:  calc(var(--radius) * 15);
+}
