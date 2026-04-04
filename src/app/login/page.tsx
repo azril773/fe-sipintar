@@ -3,18 +3,17 @@
 import { AcademicCapIcon } from "@heroicons/react/16/solid";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import Cookies from "universal-cookie";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cookies } from "@/src/utils";
 import { notification } from "@/src/utils/toast";
 import { LoginResponse } from "@/types/login";
 
 import { login } from "../_api/auth";
 
 export default function LoginPage() {
-  const cookies = new Cookies();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");

@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useEffectEvent, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,11 +12,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { searchPauds } from "@/src/app/_api/paud";
-import { GlobalContext } from "@/src/providers";
 import { Paud } from "@/src/types/paud";
+import { cookies } from "@/src/utils";
 
 export default function PaudTable() {
-  const { cookies } = useContext(GlobalContext);
   const [paudData, setPaudData] = useState<Paud[]>([]);
 
   const loadData = useEffectEvent(async () => {
