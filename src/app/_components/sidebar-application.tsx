@@ -4,7 +4,7 @@ import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@/src/components/ui/sidebar";
+} from "@/components/ui/sidebar";
 
 import SidebarLayout from "./sidebar-layout";
 
