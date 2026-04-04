@@ -1,7 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
-import Cookies from "universal-cookie";
 
 import { BASE_URL, UNAUTHORIZED_CODE } from "@/constants/index";
+import { cookies } from "@/src/utils";
 import { notification } from "@/src/utils/toast";
 
 import { refreshToken } from "./auth";
@@ -26,18 +26,18 @@ backendInstance.interceptors.response.use(
         config._retry = true;
         const { data, error } = await refreshToken();
         if (error) {
-          new Cookies().remove("access_token");
+          cookies.remove("access_token");
           notification("Sesi Berakhir", "Silakan login kembali.", "error");
           window.location.href = "/login";
           throw error;
         }
-        new Cookies().set("access_token", data?.access_token || "", {
+        cookies.set("access_token", data?.access_token || "", {
           path: "/",
         });
         config.headers.Authorization = `Bearer ${data?.access_token}`;
         return backendInstance(config);
       }else{
-        new Cookies().remove("access_token");
+        cookies.remove("access_token");
         notification("Sesi Berakhir", "Silakan login kembali.", "error");
         window.location.href = "/login";
         throw error
