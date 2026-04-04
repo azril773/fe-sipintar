@@ -19,4 +19,9 @@ export const routes: Route[] = [
     label: "Paud",
     icon: <HomeIcon />,
   },
+  {
+    href: "/users",
+    label: "Users",
+    icon: <HomeIcon />,
+  }
 ];

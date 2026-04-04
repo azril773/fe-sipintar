@@ -3,6 +3,11 @@ import React from "react"
 
 export type UUID = string
 
+export type Base = {
+    created_at: string
+    updated_at: string
+}
+
 export type Route = {
     href: string
     label: string
@@ -10,10 +15,3 @@ export type Route = {
     childrens?: Route[]
 }
 
-export type User = {
-    role_id: string
-    name: string
-    email: string
-    role: string
-    role_name: string
-}
