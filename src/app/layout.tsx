@@ -1,3 +1,5 @@
+import { configDotenv } from "dotenv";
+configDotenv();
 import { Geist, Geist_Mono } from "next/font/google";
 import { ToastContainer } from "react-toastify";
 
