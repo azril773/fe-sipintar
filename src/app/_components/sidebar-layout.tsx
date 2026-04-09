@@ -25,6 +25,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { routes } from "@/constants/index";
+import { cookies } from "@/src/utils";
+import { notification } from "@/src/utils/toast";
 import type { Route } from "@/types/common";
 
 export default function SidebarLayout() {
@@ -33,6 +35,12 @@ export default function SidebarLayout() {
 
   const handleClick = (href: string) => {
     router.push(href);
+  };
+
+  const handleLogout = () => {
+    cookies.remove("access_token", { path: "/" });
+    notification("Sukses!", "Anda berhasil logout.", "success");
+    router.replace("/login");
   };
 
   return (
@@ -118,7 +126,10 @@ export default function SidebarLayout() {
                 <DropdownMenuItem>
                   <span>Bantuan</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50">
+                <DropdownMenuItem
+                  className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                  onClick={handleLogout}
+                >
                   <ArrowRightEndOnRectangleIcon className="h-4 w-4 mr-2" />
                   <span>Keluar</span>
                 </DropdownMenuItem>
