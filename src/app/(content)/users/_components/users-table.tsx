@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useEffectEvent, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import { User } from "@/src/types/users";
 import { cookies } from "@/src/utils";
 
 export default function UserTable() {
+  const router = useRouter();
   const [userData, setUserData] = useState<User[]>([]);
 
   const loadData = useEffectEvent(async () => {
@@ -60,7 +62,11 @@ export default function UserTable() {
               <TableCell>{new Date(item.created_at).toLocaleDateString()}</TableCell>
               <TableCell>{new Date(item.updated_at).toLocaleDateString()}</TableCell>
               <TableCell>
-                <Button variant="outline" size="sm">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push(`/users/${item.id}/edit`)}
+                >
                   Edit
                 </Button>
               </TableCell>

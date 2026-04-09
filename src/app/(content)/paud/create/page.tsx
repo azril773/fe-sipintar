@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/use-auth";
 import { createPaud } from "@/src/app/_api/paud";
 import BackButton from "@/src/components/global/back-button";
+import HeaderList from "@/src/components/global/header-list";
 import {
   InputGroup,
   InputGroupAddon,
@@ -65,10 +66,7 @@ export default function CreatePaudPage() {
   return (
     <div className="p-6">
       <BackButton name="Paud" href="/paud" />
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-2">Buat PAUD Baru</h1>
-        <p className="text-gray-600">Tambahkan data PAUD baru ke sistem</p>
-      </div>
+    <HeaderList title="Buat PAUD Baru" description="Isi form berikut untuk membuat PAUD baru" />
 
       <div className="max-w-full bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
         <form className="space-y-6">
@@ -114,7 +112,7 @@ export default function CreatePaudPage() {
               className="dark:bg-zinc-700 dark:border-zinc-600"
             />
             {fileReader && (
-                <img src={fileReader} alt="Preview Logo" className="mt-2 h-20 object-contain" />
+              <img src={fileReader} alt="Preview Logo" className="mt-2 h-20 object-contain" />
             )}
           </div>
           <div className="space-y-2">

@@ -2,7 +2,8 @@ import { Base, UUID } from "./common"
 
 export type User = Base & {
     id: UUID
-    role_id: string
+    paud_id?: string | null
+    role_id?: string | null
     name: string
     email: string
     role: string
