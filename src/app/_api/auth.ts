@@ -5,14 +5,15 @@ import { getErrorMessage } from "@/src/utils";
 import { backendInstance } from ".";
 
 type ResponseRefresh = {
-  access_token: string
-  refrsh_token: string
-}
-export async function refreshToken(): Promise<{data: ResponseRefresh | null; error: string}> {
+  access_token: string;
+  refrsh_token: string;
+};
+export async function refreshToken(): Promise<{
+  data: ResponseRefresh | null;
+  error: string;
+}> {
   try {
-    const response = await backendInstance.post(
-      "/auth/refresh",
-    );
+    const response = await backendInstance.post("/auth/refresh");
     const data = response.data as ResponseRefresh;
     return { data, error: "" };
   } catch (error) {
@@ -44,5 +45,23 @@ export async function login(
   } catch (error) {
     const err = error as AxiosError;
     return { accessToken: null, error: getErrorMessage(err) };
+  }
+}
+
+export async function logout(): Promise<{ error: string }> {
+  try {
+    await backendInstance.post(
+      "/auth/logout",
+      {},
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
+    return { error: "" };
+  } catch (error) {
+    const err = error as AxiosError;
+    return { error: getErrorMessage(err) };
   }
 }
