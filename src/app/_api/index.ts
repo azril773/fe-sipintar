@@ -20,12 +20,11 @@ backendInstance.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const config = error.config as ExtendedAxiosRequestConfig;
-
-    if (error.response?.status === UNAUTHORIZED_CODE && config) {
+    if (error.response?.status === UNAUTHORIZED_CODE && config && !config.url?.includes("/auth/login")) {
       if (!config._retry) {
         config._retry = true;
         const { data, error } = await refreshToken();
-        if (error) {
+        if (error.length > 0) {
           cookies.remove("access_token");
           notification("Sesi Berakhir", "Silakan login kembali.", "error");
           window.location.href = "/login";
