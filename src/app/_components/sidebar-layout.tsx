@@ -3,10 +3,15 @@
 import {
   AcademicCapIcon,
   ArrowRightEndOnRectangleIcon,
-  ChevronDownIcon,
 } from "@heroicons/react/16/solid";
+import { ChevronDownIcon } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,26 +23,42 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupLabel,
+  SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  SidebarRail,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { routes } from "@/constants/index";
+import { routes, sidebarCollapsibleMenuSections } from "@/constants/index";
 import { cookies } from "@/src/utils";
 import { notification } from "@/src/utils/toast";
-import type { Route } from "@/types/common";
 
+const MENU_BUTTON_CLASSNAME =
+  "cursor-pointer font-light data-[active=true]:bg-sky-100 data-[active=true]:text-sky-600 hover:bg-blue-100 hover:text-blue-600";
 
+const MENU_SUB_BUTTON_CLASSNAME =
+  "cursor-pointer font-light data-[active=true]:bg-sky-100 data-[active=true]:text-sky-600 hover:bg-blue-100 hover:text-blue-600";
 
 export default function SidebarLayout() {
   const router = useRouter();
   const pathname = usePathname();
+  const isActive = (href: string) => pathname.startsWith(href);
+  const dashboardRoute = routes.find((route) => route.href === "/dashboard");
+  const settingRoute = routes.find((route) => route.href === "/setting");
 
-  const handleClick = (href: string) => {
-    router.push(href);
-  };
+  const menuSections = sidebarCollapsibleMenuSections.map((section) => {
+    const sectionRoutes = routes.filter((route) => section.hrefs.includes(route.href));
+    return {
+      ...section,
+      routes: sectionRoutes,
+      isActive: sectionRoutes.some((route) => isActive(route.href)),
+    };
+  });
 
   const handleLogout = () => {
     cookies.remove("access_token", { path: "/" });
@@ -46,73 +67,119 @@ export default function SidebarLayout() {
   };
 
   return (
-    <Sidebar className="border-r border-gray-200 bg-white">
-      <SidebarHeader className="px-4 py-6 rounded-b-lg shadow-sm">
-        <div className="flex gap-2">
-          <div className="bg-black rounded-md p-2 items-center flex">
+    <Sidebar variant="inset" className="border-none">
+      <SidebarHeader className="pt-5">
+        <div className="flex items-center gap-3 px-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-black">
             <AcademicCapIcon color="white" width={30} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold drop-shadow-lg">SiPintar</h1>
-            <p className="text-sm text-emerald-600">
-              Sistem Informasi Pendidikan
-            </p>
+            <h1 className="text-lg font-bold text-slate-900">SiPintar</h1>
+            <p className="text-xs text-slate-500">Sistem Informasi Pendidikan</p>
           </div>
         </div>
       </SidebarHeader>
+      <SidebarSeparator className="my-3" />
 
-      <SidebarContent className="px-2 py-4 bg-linear-to-br  from-[#1e3a8a] to-[#059669] text-white!">
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider mb-3 text-white">
-            Menu Utama
-          </SidebarGroupLabel>
-          <SidebarMenu className="gap-2">
-            {routes.map((route: Route) => {
-              const isActive = pathname.includes(route.href);
-
-              return (
-                <SidebarMenuItem key={route.href}>
+      <SidebarContent className="px-0 py-1">
+        {dashboardRoute && (
+          <SidebarGroup className="p-0">
+            <SidebarGroupContent>
+              <SidebarMenu className="gap-1">
+                <SidebarMenuItem key={dashboardRoute.href}>
                   <SidebarMenuButton
-                    onClick={() => handleClick(route.href)}
-                    className={`cursor-pointer group relative h-10 px-3 rounded-lg transition-all duration-200 ${isActive ? "border-l-blue-600 border-l-4 font-semibold bg-white text-black" : ""}`}
-                    asChild
+                    isActive={isActive(dashboardRoute.href)}
+                    onClick={() => router.push(dashboardRoute.href)}
+                    className={MENU_BUTTON_CLASSNAME}
                   >
-                    <button className="w-full justify-start">
-                      <span
-                        className={`transition-transform duration-200 ${isActive ? "scale-110" : "group-hover:scale-105"}`}
-                      >
-                        {route.icon}
-                      </span>
-                      <span
-                        className={`text-sm font-medium transition-colors duration-200 ${
-                          isActive ? "font-semibold" : ""
-                        }`}
-                      >
-                        {route.label}
-                      </span>
-                      {isActive && (
-                        <div className="ml-auto w-2 h-2 rounded-full bg-black animate-pulse"></div>
-                      )}
-                    </button>
+                    {dashboardRoute.icon}
+                    <span>{dashboardRoute.label}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              );
-            })}
-          </SidebarMenu>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        <SidebarGroup className="p-0 pt-1">
+          <SidebarGroupContent>
+            <SidebarMenu className="gap-1">
+              {menuSections.map((section) => {
+                const SectionIcon = section.icon;
+
+                return (
+                  <SidebarMenuItem key={section.key}>
+                    <Collapsible
+                      defaultOpen={section.isActive}
+                      className="group/collapsible"
+                    >
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton
+                          isActive={section.isActive}
+                          className={MENU_BUTTON_CLASSNAME}
+                        >
+                          <SectionIcon className={section.iconClassName} />
+                          <span>{section.label}</span>
+                          <ChevronDownIcon
+                            className={`ml-auto ${section.chevronClassName} transition-transform group-data-[state=open]/collapsible:rotate-180`}
+                          />
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+
+                      <CollapsibleContent>
+                        <SidebarMenuSub className="gap-1">
+                          {section.routes.map((route) => (
+                            <SidebarMenuSubItem key={route.href}>
+                              <SidebarMenuSubButton
+                                isActive={isActive(route.href)}
+                                onClick={() => router.push(route.href)}
+                                className={MENU_SUB_BUTTON_CLASSNAME}
+                              >
+                                <span>{route.label}</span>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
         </SidebarGroup>
+
+        {settingRoute && (
+          <SidebarGroup className="p-0">
+            <SidebarGroupContent>
+              <SidebarMenu className="gap-1">
+                <SidebarMenuItem key={settingRoute.href}>
+                  <SidebarMenuButton
+                    isActive={isActive(settingRoute.href)}
+                    onClick={() => router.push(settingRoute.href)}
+                    className={MENU_BUTTON_CLASSNAME}
+                  >
+                    {settingRoute.icon}
+                    <span>{settingRoute.label}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-gray-100 py-4 px-2">
+      <SidebarFooter className="border-t px-2 py-4">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton className="h-10 px-3 rounded-lg hover:bg-gray-100">
-                  <div className="w-8 h-8 rounded-lg bg-linear-to-br from-blue-400 to-purple-400 flex items-center justify-center text-white text-xs font-bold">
+                <SidebarMenuButton className="h-10 rounded-sm px-3 hover:bg-gray-100">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-linear-to-br from-blue-400 to-purple-400 text-xs font-bold text-white">
                     OR
                   </div>
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-xs font-semibold ">Orang Tua</span>
+                    <span className="text-xs font-semibold">Orang Tua</span>
                     <span className="text-xs">Akun Saya</span>
                   </div>
                   <ChevronDownIcon className="ml-auto h-4 w-4 text-gray-400" />
@@ -129,10 +196,10 @@ export default function SidebarLayout() {
                   <span>Bantuan</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                  className="text-red-600 focus:bg-red-50 focus:text-red-600"
                   onClick={handleLogout}
                 >
-                  <ArrowRightEndOnRectangleIcon className="h-4 w-4 mr-2" />
+                  <ArrowRightEndOnRectangleIcon className="mr-2 h-4 w-4" />
                   <span>Keluar</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -140,6 +207,7 @@ export default function SidebarLayout() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   );
 }

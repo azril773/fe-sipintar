@@ -3,6 +3,7 @@ configDotenv();
 import { Geist, Geist_Mono } from "next/font/google";
 import { ToastContainer } from "react-toastify";
 
+import { cn } from "@/lib/utils";
 import { GlobalProvider } from "@/providers/index";
 
 import type { Metadata } from "next";
@@ -31,10 +32,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={cn("antialiased", geistMono.variable, geistSans.variable, "font-sans")}
+    >
+      <body className="bg-sidebar">
         <GlobalProvider>{children}</GlobalProvider>
         <ToastContainer theme="light" />
       </body>

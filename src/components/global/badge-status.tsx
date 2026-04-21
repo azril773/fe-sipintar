@@ -1,18 +1,18 @@
-export default function BadgeStatus({ status }: { status: string }) {
-  const statusColors: Record<string, string> = {
-    active: "bg-green-100 text-green-800",
-    inactive: "bg-gray-100 text-gray-800",
-    pending: "bg-yellow-100 text-yellow-800",
-    suspended: "bg-red-100 text-red-800",
-  };
+import { Badge } from "@/components/ui/badge"
 
-  const colorClass = statusColors[status.toLowerCase()] || "bg-gray-100 text-gray-800";
+export default function BadgeStatus({ status }: { status: string }) {
+  const statusStyles: Record<string, string> = {
+    active: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    inactive: "border-slate-200 bg-slate-100 text-slate-700",
+    pending: "border-amber-200 bg-amber-50 text-amber-700",
+    suspended: "border-rose-200 bg-rose-50 text-rose-700",
+  }
+
+  const normalizedStatus = status.toLowerCase()
 
   return (
-    <span
-      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${colorClass}`}
-    >
+    <Badge className={statusStyles[normalizedStatus] || statusStyles.inactive}>
       {status.toUpperCase()}
-    </span>
-  );
+    </Badge>
+  )
 }
