@@ -18,7 +18,7 @@ import PaginationTable from "@/src/components/global/pagination";
 import { User } from "@/src/types/users";
 import { cookies } from "@/src/utils";
 
-const PER_PAGE = 5;
+const PER_PAGE = 10;
 
 export default function UserTable({
   search,
