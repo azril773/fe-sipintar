@@ -12,26 +12,42 @@ const API_URL = `${BASE_URL}/admin/api/pauds`;
 type SearchPaudsResponse = {
   pauds: Paud[];
   total: number;
-  error: string;
 };
 export async function searchPauds({
   token,
+  page,
+  perPage,
+  search,
 }: {
   token: string;
-}): Promise<{ data: Paud[]; totalPages: number; error: string }> {
+  page?: number;
+  perPage?: number;
+  search?: string;
+}): Promise<{ data: Paud[]; total: number; totalPages: number; error: string }> {
   try {
+    const effectivePerPage = perPage ?? 10;
+    const params: Record<string, string | number> = {
+      page: page ?? 1,
+      per_page: effectivePerPage,
+    };
+
+    if (search && search.trim()) {
+      params.search = search;
+    }
+
     const response = await backendInstance.get(API_URL, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
+      params,
     });
     const { pauds, total }: SearchPaudsResponse = response.data;
-    const totalPages = Math.ceil(total / 10);
-    return { data: pauds, totalPages, error: "" };
+    const totalPages = Math.ceil(total / effectivePerPage);
+    return { data: pauds, total, totalPages, error: "" };
   } catch (err) {
     const error = err as AxiosError;
-    return { data: [], totalPages: 0, error: getErrorMessage(error) };
+    return { data: [], total: 0, totalPages: 0, error: getErrorMessage(error) };
   }
 }
 

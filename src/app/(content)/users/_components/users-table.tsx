@@ -18,7 +18,7 @@ import PaginationTable from "@/src/components/global/pagination";
 import { User } from "@/src/types/users";
 import { cookies } from "@/src/utils";
 
-const PER_PAGE = 10;
+const PER_PAGE = 5;
 
 export default function UserTable({
   search,
@@ -27,56 +27,41 @@ export default function UserTable({
 }: {
   search: string;
   currentPage: number;
-  onPageChange: (page: number) => void;
+  onPageChange: Dispatch<SetStateAction<number>>;
 }) {
   const router = useRouter();
   const [userData, setUserData] = useState<User[]>([]);
+  const [totalPages, setTotalPages] = useState<number>(1);
 
-  const loadData = useEffectEvent(async () => {
+  const loadData = useEffectEvent(async (page: number) => {
     const token = cookies.get("access_token");
-    if (!token) return;
-
-    const { data, error } = await searchUsers({ token });
-    if (error) {
-      console.log(error);
+    if (!token) {
       return;
     }
+
+    const { data, totalPages: nextTotalPages, error } = await searchUsers({
+      token,
+      page,
+      perPage: PER_PAGE,
+      search,
+    });
+
+    if (error) {
+      return;
+    }
+
     setUserData(data);
+    setTotalPages(nextTotalPages);
+
+    if (page > nextTotalPages) {
+      onPageChange(nextTotalPages);
+      return;
+    }
   });
 
-  const normalizedSearch = search.trim().toLowerCase();
-  const filteredData = userData.filter((item) => {
-    if (!normalizedSearch) {
-      return true;
-    }
-
-    return (
-      item.name.toLowerCase().includes(normalizedSearch) ||
-      item.email.toLowerCase().includes(normalizedSearch)
-    );
-  });
-
-  const totalPages = Math.max(1, Math.ceil(filteredData.length / PER_PAGE));
-  const safeCurrentPage = Math.min(currentPage, totalPages);
-  const handlePageChange: Dispatch<SetStateAction<number>> = (value) => {
-    const nextPage = typeof value === "function" ? value(safeCurrentPage) : value;
-    onPageChange(nextPage);
-  };
-
-  const paginatedData = filteredData.slice(
-    (safeCurrentPage - 1) * PER_PAGE,
-    safeCurrentPage * PER_PAGE,
-  );
-
   useEffect(() => {
-    loadData();
-  }, []);
-
-  useEffect(() => {
-    if (safeCurrentPage !== currentPage) {
-      onPageChange(safeCurrentPage);
-    }
-  }, [currentPage, onPageChange, safeCurrentPage]);
+    loadData(currentPage);
+  }, [currentPage, search]);
 
   return (
     <div className="space-y-3">
@@ -95,10 +80,10 @@ export default function UserTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedData.map((item, index) => (
+            {userData.map((item, index) => (
               <TableRow key={item.id}>
                 <TableCell className="pl-10 table-cell-number">
-                  {(safeCurrentPage - 1) * PER_PAGE + index + 1}
+                  {(currentPage - 1) * PER_PAGE + index + 1}
                 </TableCell>
                 <TableCell className="table-cell-primary">{item.name}</TableCell>
                 <TableCell className="table-cell-muted">{item.email}</TableCell>
@@ -126,7 +111,7 @@ export default function UserTable({
                 </TableCell>
               </TableRow>
             ))}
-            {paginatedData.length === 0 && (
+            {userData.length === 0 && (
               <TableRow>
                 <TableCell colSpan={8} className="py-10 text-center text-sm text-slate-500">
                   Data users tidak ditemukan.
@@ -138,8 +123,8 @@ export default function UserTable({
       </div>
 
       <PaginationTable
-        currentPage={safeCurrentPage}
-        setCurrentPage={handlePageChange}
+        currentPage={currentPage}
+        setCurrentPage={onPageChange}
         totalPages={totalPages}
       />
     </div>

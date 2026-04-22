@@ -30,14 +30,18 @@ export default function PaudPage() {
       return;
     }
 
-    const { data, error } = await searchPauds({ token });
+    const { total, error } = await searchPauds({
+      token,
+      page: 1,
+      perPage: 1,
+    });
 
     if (error) {
       return;
     }
 
     setStats({
-      totalPaud: data.length,
+      totalPaud: total,
     });
   });
 

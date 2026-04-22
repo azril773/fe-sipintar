@@ -33,7 +33,11 @@ export default function UsersPage() {
             return;
         }
 
-        const { data, error } = await searchUsers({ token });
+        const { total, data, error } = await searchUsers({
+            token,
+            page: 1,
+            perPage: 1,
+        });
 
         if (error) {
             return;
@@ -42,7 +46,7 @@ export default function UsersPage() {
         const totalRoles = new Set(data.map((user) => user.role_name)).size;
 
         setStats({
-            totalUsers: data.length,
+            totalUsers: total,
             totalRoles,
         });
     });

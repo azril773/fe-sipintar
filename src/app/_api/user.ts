@@ -10,26 +10,43 @@ const API_URL = "/admin/api/users";
 type SearchUsersResponse = {
   users: User[];
   total: number;
-  error: string;
 };
 
 export async function searchUsers({
   token,
+  page,
+  perPage,
+  search,
 }: {
   token: string;
-}): Promise<{ data: User[]; error: string }> {
+  page?: number;
+  perPage?: number;
+  search?: string;
+}): Promise<{ data: User[]; total: number; totalPages: number; error: string }> {
   try {
+    const effectivePerPage = perPage ?? 5;
+    const params: Record<string, string | number> = {
+      page: page ?? 1,
+      per_page: effectivePerPage,
+    };
+
+    if (search && search.trim()) {
+      params.search = search;
+    }
+
     const response = await backendInstance.get(API_URL, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
+      params,
     });
-    const { users }: SearchUsersResponse = response.data;
-    return { data: users, error: "" };
+    const { users, total }: SearchUsersResponse = response.data;
+    const totalPages = Math.ceil(total / effectivePerPage);
+    return { data: users, total, totalPages, error: "" };
   } catch (err) {
     const error = err as AxiosError;
-    return { data: [], error: getErrorMessage(error) };
+    return { data: [], total: 0, totalPages: 0, error: getErrorMessage(error) };
   }
 }
 

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Dispatch, SetStateAction, useEffect, useEffectEvent, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 import {
   Table,
   TableBody,
@@ -14,11 +15,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useAuth } from "@/hooks/use-auth";
 import { activatePaud, searchPauds, suspendPaud } from "@/src/app/_api/paud";
 import ConfirmAlertDialog from "@/src/components/global/alert";
 import BadgeStatus from "@/src/components/global/badge-status";
-import PaginationTable from "@/src/components/global/pagination";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,81 +39,78 @@ export default function PaudTable({
 }: {
   search: string;
   currentPage: number;
-  onPageChange: (page: number) => void;
+  onPageChange: Dispatch<SetStateAction<number>>;
 }) {
-  const { token } = useAuth();
   const [paudData, setPaudData] = useState<Paud[]>([]);
+  const [totalPages, setTotalPages] = useState<number>(1);
 
   const [selectedId, setSelectedId] = useState<UUID | null>(null);
-  const [statusChange, setStatusChange] = useState<
-    "activate" | "suspend" | null
-  >(null);
-
+  const [statusChange, setStatusChange] = useState<"activate" | "suspend" | null>(null);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
 
-  const loadData = useEffectEvent(async () => {
+  const loadData = useEffectEvent(async (page: number) => {
     const token = cookies.get("access_token");
-    if (!token) return;
-
-    const { data, error } = await searchPauds({ token });
-    if (error) {
-      console.log(error);
+    if (!token) {
       return;
     }
+
+    const { data, total, error } = await searchPauds({
+      token,
+      page,
+      perPage: PER_PAGE,
+      search,
+    });
+
+    if (error) {
+      notification("Error!", error, "error");
+      return;
+    }
+
+    const nextTotalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+
     setPaudData(data);
+    setTotalPages(nextTotalPages);
+
+    if (page > nextTotalPages) {
+      onPageChange(nextTotalPages);
+    }
   });
 
   const handleStatusChange = async (
     id: UUID | null,
     status: "activate" | "suspend" | null,
   ) => {
-    if (!token) return;
+    const token = cookies.get("access_token");
+    if (!token) {
+      return;
+    }
+
     if (!id || !status) {
       notification("Error!", "ID atau status tidak valid.", "error");
       return;
     }
-    const { error } = await (
-      status === "activate" ? activatePaud : suspendPaud
-    )(id, token);
+
+    const { error } = await (status === "activate" ? activatePaud : suspendPaud)(id, token);
     if (error.length > 0) {
       notification("Error!", error, "error");
       return;
     }
+
     notification(
       "Sukses!",
-      `PAUD berhasil ${status === "activate" ? "diaktifkan" : "disebutkan"}.`,
+      `PAUD berhasil ${status === "activate" ? "diaktifkan" : "disuspend"}.`,
       "success",
     );
-    loadData();
+    loadData(currentPage);
     setIsAlertOpen(false);
   };
 
-  const normalizedSearch = search.trim().toLowerCase();
-  const filteredData = paudData.filter((item) => {
-    if (!normalizedSearch) {
-      return true;
-    }
-
-    return (
-      item.name.toLowerCase().includes(normalizedSearch) ||
-      item.subdomain.toLowerCase().includes(normalizedSearch)
-    );
-  });
-
-  const totalPages = Math.max(1, Math.ceil(filteredData.length / PER_PAGE));
-  const safeCurrentPage = Math.min(currentPage, totalPages);
-  const handlePageChange: Dispatch<SetStateAction<number>> = (value) => {
-    const nextPage = typeof value === "function" ? value(safeCurrentPage) : value;
-    onPageChange(nextPage);
-  };
-  const paginatedData = filteredData.slice(
-    (safeCurrentPage - 1) * PER_PAGE,
-    safeCurrentPage * PER_PAGE,
-  );
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
+  const paginatedData = paudData;
 
   useEffect(() => {
-    loadData();
-  }, []);
+    loadData(currentPage);
+  }, [currentPage, search]);
 
   useEffect(() => {
     if (safeCurrentPage !== currentPage) {
@@ -125,99 +121,105 @@ export default function PaudTable({
   return (
     <div className="space-y-3">
       <div className="table-shell">
-      <Table className="[--gutter:--spacing(6)] lg:[--gutter:--spacing(10)]">
-        <TableHeader>
-          <TableRow>
-            <TableHead className="pl-10 table-head-typography">No</TableHead>
-            <TableHead className="table-head-typography">Logo</TableHead>
-            <TableHead className="table-head-typography">Nama</TableHead>
-            <TableHead className="table-head-typography">Subdomain</TableHead>
-            <TableHead className="table-head-typography">Status</TableHead>
-            <TableHead className="pr-10 text-center table-head-typography">Aksi</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {paginatedData.map((item, index) => (
-            <TableRow key={item.id}>
-              <TableCell className="pl-10 table-cell-number">{(safeCurrentPage - 1) * PER_PAGE + index + 1}</TableCell>
-              <TableCell>
-                <Image
-                  src={`${BASE_URL}/public/images.png`}
-                  alt={item.name}
-                  width={48}
-                  height={48}
-                  className="h-12 w-12 rounded-xl border border-slate-200 object-cover shadow-sm"
-                />
-              </TableCell>
-              <TableCell className="table-cell-primary">{item.name}</TableCell>
-              <TableCell className="table-cell-muted">
-                <Link
-                  className="text-blue-500 hover:text-blue-600"
-                  href={`http://${item.subdomain}.${DOMAIN}`}
-                  target="_blank"
-                >
-                  {`${item.subdomain}.${DOMAIN}`}
-                </Link>
-              </TableCell>
-              <TableCell className="table-cell-muted"><BadgeStatus status={item.status} /></TableCell>
-              <TableCell className="pr-10">
-                <div className="flex items-center justify-center">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="h-8 w-8 p-0 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                      >
-                        <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {item.status === ACTIVE && (
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setIsAlertOpen(true);
-                            setSelectedId(item.id);
-                            setStatusChange("suspend");
-                          }}
-                          className="focus:bg-accent focus:text-accent-foreground"
-                        >
-                          Suspend
-                        </DropdownMenuItem>
-                      )}
-                      {item.status === SUSPENDED && (
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setIsAlertOpen(true);
-                            setSelectedId(item.id);
-                            setStatusChange("activate");
-                          }}
-                          className="focus:bg-accent focus:text-accent-foreground"
-                        >
-                          Activate
-                        </DropdownMenuItem>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-          {paginatedData.length === 0 && (
+        <Table className="[--gutter:--spacing(6)] lg:[--gutter:--spacing(10)]">
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan={6} className="py-10 text-center text-sm text-slate-500">
-                Data PAUD tidak ditemukan.
-              </TableCell>
+              <TableHead className="pl-10 table-head-typography">No</TableHead>
+              <TableHead className="table-head-typography">Logo</TableHead>
+              <TableHead className="table-head-typography">Nama</TableHead>
+              <TableHead className="table-head-typography">Subdomain</TableHead>
+              <TableHead className="table-head-typography">Status</TableHead>
+              <TableHead className="pr-10 text-center table-head-typography">Aksi</TableHead>
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {paginatedData.map((item, index) => (
+              <TableRow key={item.id}>
+                <TableCell className="pl-10 table-cell-number">
+                  {(safeCurrentPage - 1) * PER_PAGE + index + 1}
+                </TableCell>
+                <TableCell>
+                  <Image
+                    src={item.logo || `${BASE_URL}/public/images.png`}
+                    alt={item.name}
+                    width={48}
+                    height={48}
+                    className="h-12 w-12 rounded-xl border border-slate-200 object-cover shadow-sm"
+                  />
+                </TableCell>
+                <TableCell className="table-cell-primary">{item.name}</TableCell>
+                <TableCell className="table-cell-muted">
+                  <Link
+                    className="text-blue-500 hover:text-blue-600"
+                    href={`http://${item.subdomain}.${DOMAIN}`}
+                    target="_blank"
+                  >
+                    {`${item.subdomain}.${DOMAIN}`}
+                  </Link>
+                </TableCell>
+                <TableCell className="table-cell-muted">
+                  <BadgeStatus status={item.status} />
+                </TableCell>
+                <TableCell className="pr-10">
+                  <div className="flex items-center justify-center">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className="h-8 w-8 p-0 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                        >
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {item.status === ACTIVE && (
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setIsAlertOpen(true);
+                              setSelectedId(item.id);
+                              setStatusChange("suspend");
+                            }}
+                            className="focus:bg-accent focus:text-accent-foreground"
+                          >
+                            Suspend
+                          </DropdownMenuItem>
+                        )}
+                        {item.status === SUSPENDED && (
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setIsAlertOpen(true);
+                              setSelectedId(item.id);
+                              setStatusChange("activate");
+                            }}
+                            className="focus:bg-accent focus:text-accent-foreground"
+                          >
+                            Activate
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+            {paginatedData.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={6} className="py-10 text-center text-sm text-slate-500">
+                  Data PAUD tidak ditemukan.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
-      <PaginationTable
+
+      <PaginationControls
         currentPage={safeCurrentPage}
-        setCurrentPage={handlePageChange}
         totalPages={totalPages}
+        onPageChange={onPageChange}
       />
+
       <ConfirmAlertDialog
         title="Konfirmasi Perubahan Status"
         isOpen={isAlertOpen}
