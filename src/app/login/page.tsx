@@ -39,7 +39,7 @@ export default function LoginPage() {
       notification("Login Berhasil!", "Anda akan diarahkan ke subdomain Anda.", "success");
       setTimeout(() => {
         window.location.href =
-          (process.env.NEXT_PUBLIC_HTTP_SECURE ? "https://" : "http://") +
+          (process.env.NEXT_PUBLIC_HTTP_SECURE === "true" ? "https://" : "http://") +
           `${token.subdomain}.${DOMAIN}`;
       }, 1000);
     }

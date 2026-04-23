@@ -1,10 +1,9 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
 import { BASE_URL, UNAUTHORIZED_CODE } from "@/constants/index";
-import { cookies } from "@/src/utils";
 import { notification } from "@/src/utils/toast";
 
-import { refreshToken } from "./auth";
+import { logout, refreshToken } from "./auth";
 
 interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
@@ -23,20 +22,18 @@ backendInstance.interceptors.response.use(
     if (error.response?.status === UNAUTHORIZED_CODE && config && !config.url?.includes("/auth/login")) {
       if (!config._retry) {
         config._retry = true;
-        const { data, error } = await refreshToken();
+        const {data, error } = await refreshToken();
         if (error.length > 0) {
-          cookies.remove("access_token");
+          await logout();
           notification("Sesi Berakhir", "Silakan login kembali.", "error");
           window.location.href = "/login";
           throw error;
         }
-        cookies.set("access_token", data?.access_token || "", {
-          path: "/",
-        });
-        config.headers.Authorization = `Bearer ${data?.access_token}`;
+        const token = data?.access_token ?? '';
+        config.headers.Authorization = `Bearer ${token}`;
         return backendInstance(config);
       }else{
-        cookies.remove("access_token");
+        await logout()
         notification("Sesi Berakhir", "Silakan login kembali.", "error");
         window.location.href = "/login";
         throw error

@@ -1,7 +1,7 @@
 import { jwtDecode } from "jwt-decode";
 import { NextRequest, NextResponse } from "next/server";
 
-import { ADMIN_DINAS, DOMAIN } from "./constants";
+import { ADMIN_DINAS } from "./constants";
 import { AccessTokenClaim } from "./types/jwt";
 
 export function proxy(req: NextRequest) {
@@ -17,11 +17,8 @@ export function proxy(req: NextRequest) {
   }else{
     const claim: AccessTokenClaim = jwtDecode(req.cookies.get("access_token")?.value ?? "");
     if (claim.role_name != ADMIN_DINAS) {
-      const url = `${claim.subdomain}.${DOMAIN}`
-      console.log(new Date())
-      console.log(DOMAIN)
-      console.log(url)
-      return NextResponse.redirect(new URL(`${req.nextUrl.pathname}${req.nextUrl.search}`, `http://${url}`));
+      const url = `${claim.subdomain}.${process.env.NEXT_PUBLIC_DOMAIN}`;
+      return NextResponse.redirect(new URL(`${req.nextUrl.pathname}${req.nextUrl.search}`, `${process.env.NEXT_PUBLIC_HTTP_SECURE === "true" ? "https" : "http"}://${url}`));
     }
   }
   return NextResponse.next();
