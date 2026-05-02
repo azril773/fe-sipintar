@@ -2,7 +2,7 @@ import {
   Cog6ToothIcon,
   HomeIcon,
 } from "@heroicons/react/16/solid";
-import { FolderOpen, Users } from "lucide-react";
+import { FolderOpen, Layers3, Users } from "lucide-react";
 
 import { Route } from "@/types/common";
 
@@ -24,6 +24,7 @@ export const UNAUTHORIZED_CODE = 401
 
 export const USER_MANAGEMENT_HREFS = ["/users"]
 export const MASTER_DATA_HREFS = ["/paud"]
+export const KAIH_HREFS = ["/kaih-aspects", "/kaih-indicators"]
 
 export const sidebarCollapsibleMenuSections = [
   {
@@ -41,6 +42,14 @@ export const sidebarCollapsibleMenuSections = [
     iconClassName: "h-4 w-4",
     chevronClassName: "h-4 w-4",
     hrefs: MASTER_DATA_HREFS,
+  },
+  {
+    key: "kaih",
+    label: "KAIH",
+    icon: Layers3,
+    iconClassName: "h-4 w-4",
+    chevronClassName: "h-4 w-4",
+    hrefs: KAIH_HREFS,
   },
 ]
 
@@ -64,5 +73,15 @@ export const routes: Route[] = [
     href: "/users",
     label: "Users",
     icon: <HomeIcon />,
+  },
+  {
+    href: "/kaih-aspects",
+    label: "KAIH Aspects",
+    icon: <FolderOpen />,
+  },
+  {
+    href: "/kaih-indicators",
+    label: "KAIH Indicators",
+    icon: <FolderOpen />,
   }
 ];
